@@ -19,6 +19,6 @@ sudo apt install curl
 ```
 
 ```bash
-curl -fsSL https://gitlab.com/juwju/0010000-JUWJU/-/raw/main/000000-SRV-SCRIPT/00010-Bash/0010-srv-setup.sh -o setup.sh
+curl -fsSL 000000-SRV-SCRIPT/00010-Bash/0010-JUW-INSTALL.sh -o setup.sh
 bash setup.sh
 ```
