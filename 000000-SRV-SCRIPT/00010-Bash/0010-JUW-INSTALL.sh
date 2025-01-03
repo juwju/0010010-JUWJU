@@ -192,7 +192,7 @@ declare -A noteHeader noteRows noteTitle boardHeader boardRows boardTitle Master
     loadBoard() {
         boardTitle["MainInstall"]="JUWJU INSTALL PROCESS"
         boardHeader["MainInstall"]="Target,Step,Description,States;"
-        boardRows["MainInstall"]="System,Basic_setup,Setup_groups,users,directories,0;"
+        boardRows["MainInstall"]="System,Basic_setup,Setup_groups/users/directories,0;"
         boardRows["MainInstall"]+="System,Optimization,Inspect/clean/update/requirements,0;"
         boardRows["MainInstall"]+="Hardware,Optimization,Inspect/update/requirements,0;"
         boardRows["MainInstall"]+="Software,Optimization,Install/configure/start,0;"
