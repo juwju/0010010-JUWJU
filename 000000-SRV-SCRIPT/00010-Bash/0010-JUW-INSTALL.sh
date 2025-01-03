@@ -120,87 +120,85 @@ declare -A noteHeader noteRows noteTitle boardHeader boardRows boardTitle Master
 ###################################################################################
 # 3. BOARD FUNCTIONS
 ###################################################################################    
-    declare -A headers_map rows_map titleMap boardHeader boardRows boardTitle wcol
-
     showBoard() {
-    local boardName="$1"
-    # Utiliser '//' comme séparateur de lignes
-    IFS='//' read -ra rows <<< "${boardRows["$boardName"]}"
-    local headers=(${boardHeader["$boardName"]//,/ })
+        local boardName="$1"
+        # Utiliser ';' comme séparateur de lignes
+        IFS=';' read -ra rows <<< "${boardRows["$boardName"]}"
+        local headers=(${boardHeader["$boardName"]//,/ })
 
-    # Définir les largeurs des colonnes
-    wcol[1]=4   # Index
-    wcol[2]=12  # Target
-    wcol[3]=20  # Step
-    wcol[4]=40  # Description
-    wcol[5]=10  # States
+        # Définir les largeurs des colonnes
+        wcol[1]=4   # Index
+        wcol[2]=12  # Target
+        wcol[3]=20  # Step
+        wcol[4]=40  # Description
+        wcol[5]=10  # States
 
-    clear
-    echo -e "${BLUE}============================================================"
-    echo -e "${GREEN} ${boardTitle["$boardName"]^^}"  # Nom du tableau en majuscules
-    echo -e "${BLUE}============================================================"
+        clear
+        echo -e "${BLUE}============================================================"
+        echo -e "${GREEN} ${boardTitle["$boardName"]^^}"  # Nom du tableau en majuscules
+        echo -e "${BLUE}============================================================"
 
-    # Afficher les en-têtes seulement si headers n'est pas vide
-    if [ -n "${boardHeader["$boardName"]}" ]; then
-        printf "${GREEN}%-${wcol[1]}s${BLUE} | " "#"
-        for i in "${!headers[@]}"; do
-            printf "${GREEN}%-${wcol[$((i + 2))]}s${BLUE} | " "${headers[$i]}"
-        done
-        echo -e "\n${BLUE}============================================================"
-    fi
-
-    # Afficher les lignes seulement si rows n'est pas vide
-    if [ -n "${boardRows["$boardName"]}" ]; then
-        local index=1
-        for row in "${rows[@]}"; do
-            IFS='|' read -r -a cols <<< "$row"  # Utiliser '|' comme séparateur
-
-            printf "${GREEN}%-${wcol[1]}s${BLUE} | " "$index"
-            for i in "${!cols[@]}"; do
-                if [ $i -eq 3 ]; then  # Gestion des états (States)
-                    case "${cols[$i]}" in
-                        0) cols[$i]="[..]";;
-                        1) cols[$i]="[+.]";;
-                        2) cols[$i]="[OK]";;
-                        3) cols[$i]="[NO]";;
-                    esac
-                fi
-                printf "%-${wcol[$((i + 2))]}s${BLUE} | " "${cols[$i]}"
+        # Afficher les en-têtes seulement si headers n'est pas vide
+        if [ -n "${boardHeader["$boardName"]}" ]; then
+            printf "${GREEN}%-${wcol[1]}s${BLUE} | " "#"
+            for i in "${!headers[@]}"; do
+                printf "${GREEN}%-${wcol[$((i + 2))]}s${BLUE} | " "${headers[$i]}"
             done
+            echo -e "\n${BLUE}============================================================"
+        fi
 
-            echo ""
-            ((index++))
-        done
-    fi
+        # Afficher les lignes seulement si rows n'est pas vide
+        if [ -n "${boardRows["$boardName"]}" ]; then
+            local index=1
+            for row in "${rows[@]}"; do
+                IFS=',' read -r -a cols <<< "$row"  # Utiliser ',' comme séparateur
 
-    echo -e "\nPress [SPACE] to continue, [c] to clear and restart install, or [x] to exit..."
-}
+                printf "${GREEN}%-${wcol[1]}s${BLUE} | " "$index"
+                for i in "${!cols[@]}"; do
+                    if [ $i -eq 4 ]; then  # Gestion des états (States)
+                        case "${cols[$i]}" in
+                            0) cols[$i]="[..]";;
+                            1) cols[$i]="[+.]";;
+                            2) cols[$i]="[OK]";;
+                            3) cols[$i]="[NO]";;
+                        esac
+                    fi
+                    printf "%-${wcol[$((i + 2))]}s${BLUE} | " "${cols[$i]}"
+                done
 
-UpdateRow() {
-    local boardName="$1"
-    local rowIndex=$2
-    local newState="$3"
-    # Utiliser '//' comme séparateur de lignes
-    IFS='//' read -ra rows <<< "${boardRows["$boardName"]}"
-    IFS='|' read -r -a cols <<< "${rows[$((rowIndex - 1))]}"  # Utiliser '|' comme séparateur
+                echo ""
+                ((index++))
+            done
+        fi
+    }
 
-    cols[4]="$newState"  # Met à jour la colonne 5 (index 4)
-    # Reconstruire la ligne avec '|'
-    rows[$((rowIndex - 1))]="$(IFS=|; echo "${cols[*]}")"
-    # Reconstruire boardRows avec '//' comme séparateur
-    boardRows["$boardName"]="$(IFS=//; echo "${rows[*]}")"
-}
 
-loadBoard() {
-    boardTitle["MainInstall"]="JUWJU INSTALL PROCESS"
-    boardHeader["MainInstall"]="Target,Step,Description,States"
-    boardRows["MainInstall"]="System|Basic_setup|Setup_groups/users/directories|0//"
-    boardRows["MainInstall"]+="System|Optimization|Inspect/clean/update/requirements|0//"
-    boardRows["MainInstall"]+="Hardware|Optimization|Inspect/update/requirements|0//"
-    boardRows["MainInstall"]+="Software|Optimization|Install/configure/start|0//"
-    boardRows["MainInstall"]+="Network|Optimization|Setup/secure/connect|0//"
-    boardRows["MainInstall"]+="Juwju|Launch|Access_visual_next_step|0//"
-}
+    UpdateRow() {
+        local boardName="$1"
+        local rowIndex=$2
+        local newState="$3"
+        # Utiliser ';' comme séparateur de lignes
+        IFS=';' read -ra rows <<< "${boardRows["$boardName"]}"
+        IFS=',' read -r -a cols <<< "${rows[$((rowIndex - 1))]}"  # Utiliser ',' comme séparateur
+
+        cols[4]="$newState"  # Met à jour la colonne 5 (index 4)
+        # Reconstruire la ligne avec ','
+        rows[$((rowIndex - 1))]="$(IFS=,; echo "${cols[*]}")"
+        # Reconstruire boardRows avec ';' comme séparateur de lignes
+        boardRows["$boardName"]="$(IFS=\;; echo "${rows[*]}")"
+    }
+
+
+    loadBoard() {
+        boardTitle["MainInstall"]="JUWJU INSTALL PROCESS"
+        boardHeader["MainInstall"]="Target,Step,Description,States;"
+        boardRows["MainInstall"]="System,Basic_setup,Setup_groups,users,directories,0;"
+        boardRows["MainInstall"]+="System,Optimization,Inspect/clean/update/requirements,0;"
+        boardRows["MainInstall"]+="Hardware,Optimization,Inspect/update/requirements,0;"
+        boardRows["MainInstall"]+="Software,Optimization,Install/configure/start,0;"
+        boardRows["MainInstall"]+="Network,Optimization,Setup/secure/connect,0;"
+        boardRows["MainInstall"]+="Juwju,Launch,Access_visual_next_step,0;"
+    }
 
 
 
