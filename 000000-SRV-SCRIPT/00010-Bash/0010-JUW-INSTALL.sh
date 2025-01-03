@@ -127,11 +127,11 @@ declare -A noteHeader noteRows noteTitle boardHeader boardRows boardTitle Master
         local headers=(${boardHeader["$boardName"]//,/ })
 
         # Définir les largeurs des colonnes
-        wcol[1]=4   # Index
+        wcol[1]=2   # Index
         wcol[2]=12  # Target
         wcol[3]=20  # Step
         wcol[4]=40  # Description
-        wcol[5]=10  # States
+        wcol[5]=7  # States
 
         clear
         echo -e "${BLUE}============================================================"
@@ -191,7 +191,7 @@ declare -A noteHeader noteRows noteTitle boardHeader boardRows boardTitle Master
 
     loadBoard() {
         boardTitle["MainInstall"]="JUWJU INSTALL PROCESS"
-        boardHeader["MainInstall"]="Target,Step,Description,States;"
+        boardHeader["MainInstall"]="Target,Step,Description,States"
         boardRows["MainInstall"]="System,Basic_setup,Setup_environnement,0;"
         boardRows["MainInstall"]+="System,Optimization,Inspect/clean/update/requirements,0;"
         boardRows["MainInstall"]+="Hardware,Optimization,Inspect/update/requirements,0;"
