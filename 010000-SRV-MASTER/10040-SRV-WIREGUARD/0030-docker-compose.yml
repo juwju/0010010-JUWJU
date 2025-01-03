@@ -1,0 +1,158 @@
+services:
+  init-config:
+    image: busybox
+    labels:
+      - "com.juwju.service=${SERVICE_NAME}"
+      - "com.juwju.microservice=${MICROSERVICE_NAME}"
+      - "com.juwju.type=config"
+    command: |
+      sh -c "if [ ! -f /app/config/config.yml ]; then
+        mkdir -p /app/config && 
+        echo 'core:
+          admin_user: ${WEBMASTER_EMAIL}
+          admin_password: ${WEBMASTER_PASSWORD}
+        
+        web:
+          external_url: http://localhost:8888' > /app/config/config.yml
+      fi"
+    volumes:
+      - portal_config:/app/config
+    deploy:
+      labels:
+        - "com.juwju.service=${SERVICE_NAME}"
+        - "com.juwju.microservice=${MICROSERVICE_NAME}"
+      restart_policy:
+        condition: none
+      placement:
+        constraints:
+          - node.role == manager
+          - node.labels.glusterfs == true
+
+  srv-wireguard:
+    image: linuxserver/wireguard
+    labels:
+      - "com.juwju.service=${SERVICE_NAME}"
+      - "com.juwju.microservice=${MICROSERVICE_NAME}"
+      - "com.juwju.type=vpn"
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Toronto
+      - SERVERURL=${MASTER_IP}
+      - SERVERPORT=51820
+      - PEERS=1
+      - PEERDNS=auto
+      - INTERNAL_SUBNET=10.8.0.0/24
+      - ALLOWEDIPS=0.0.0.0/0
+      - POSTUP=iptables -I DOCKER-USER -i wg0 -d 1${ACTUAL_SERVER_ID}.${APP_ID}.${SERVICE_ID}.0/24 -j ACCEPT; iptables -t nat -A POSTROUTING -d 1${ACTUAL_SERVER_ID}.${APP_ID}.${SERVICE_ID}.0/24 -j MASQUERADE
+      - POSTDOWN=iptables -D DOCKER-USER -i wg0 -d 1${ACTUAL_SERVER_ID}.${APP_ID}.${SERVICE_ID}.0/24 -j ACCEPT; iptables -t nat -D POSTROUTING -d 1${ACTUAL_SERVER_ID}.${APP_ID}.${SERVICE_ID}.0/24 -j MASQUERADE
+    volumes:
+      - wireguard_config:/config
+    ports:
+      - target: 51820
+        published: ${APP_ID}${SERVICE_ID}${MICROSERVICE_ID}1
+        protocol: udp
+        mode: host
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    deploy:
+      labels:
+        - "com.juwju.service=${SERVICE_NAME}"
+        - "com.juwju.microservice=${MICROSERVICE_NAME}"
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+          - node.labels.glusterfs == true
+      restart_policy:
+        condition: none
+    privileged: true
+    networks:
+      default:
+        ipv4_address: 2${ACTUAL_SERVER_ID}.${APP_ID}.${SERVICE_ID}.1
+
+  wg-portal:
+    image: wgportal/wg-portal:latest
+    labels:
+      - "com.juwju.service=${SERVICE_NAME}"
+      - "com.juwju.microservice=${MICROSERVICE_NAME}"
+      - "com.juwju.type=portal"
+    environment:
+      - WG_PORTAL_PORT=8888
+      - WG_PORTAL_ADMIN_PASSWORD=${WEBMASTER_PASSWORD}
+      - WG_PORTAL_DB_PATH=/app/data/wg_portal.db
+      - WG_PORTAL_CONFIG_PATH=/app/config/config.yml
+      - WG_PORTAL_LOG_LEVEL=info
+      - WG_PORTAL_ADMIN_USER=${WEBMASTER_EMAIL} 
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "${APP_ID}${SERVICE_ID}${MICROSERVICE_ID}${MICROSERVICE_VERSION}:8888"
+    volumes:
+      - portal_data:/app/data
+      - portal_config:/app/config
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      labels:
+        - "com.juwju.service=${SERVICE_NAME}"
+        - "com.juwju.microservice=${MICROSERVICE_NAME}"
+      placement:
+        constraints:
+          - node.role == manager
+          - node.labels.glusterfs == true
+      update_config:
+        order: start-first
+        failure_action: rollback
+      restart_policy:
+        condition: none
+    networks:
+      default:
+        ipv4_address: 2${ACTUAL_SERVER_ID}.${APP_ID}.${SERVICE_ID}.2
+
+networks:
+  default:
+    name: ${NETWORK_NAME}
+    driver: overlay
+    attachable: true
+    driver_opts:
+      encrypted: "true"
+      com.docker.network.driver.mtu: 1420
+    ipam:
+      config:
+        - subnet: 2${ACTUAL_SERVER_ID}.${APP_ID}.${SERVICE_ID}.0/24
+
+volumes:
+  wireguard_config:
+    name: "${APP_ID}${SERVICE_ID}${MICROSERVICE_ID}0-wireguard_config"
+    driver: glusterfs
+    driver_opts:
+      voluri: "gv0/wireguard_config"
+  wireguard_data:
+    name: "${APP_ID}${SERVICE_ID}${MICROSERVICE_ID}0-wireguard_data"
+    driver: glusterfs
+    driver_opts:
+      voluri: "gv0/wireguard_data"
+  portal_config:
+    name: "${APP_ID}${SERVICE_ID}${MICROSERVICE_ID}0-portal_config"
+    driver: glusterfs
+    driver_opts:
+      voluri: "gv0/portal_config"
+  portal_data:
+    name: "${APP_ID}${SERVICE_ID}${MICROSERVICE_ID}0-portal_data"
+    driver: glusterfs
+    driver_opts:
+      voluri: "gv0/portal_data"
+
+

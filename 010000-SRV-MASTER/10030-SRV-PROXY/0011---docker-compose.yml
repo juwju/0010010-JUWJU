@@ -1,0 +1,88 @@
+services:
+  proxy:
+    image: 'docker.io/jc21/nginx-proxy-manager:latest'
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - "com.networksintelligence.app=${APP_ID}"
+        - "com.networksintelligence.service=${SERVICE_ID}"
+      update_config:
+        order: start-first
+        failure_action: rollback
+      restart_policy:
+        condition: always
+        delay: 5s
+
+    ports:
+      - target: 81
+        published: ${PORT_FTD}
+        protocol: tcp
+        mode: host
+      - target: 80
+        published: ${PORT_HTTP}
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: ${PORT_HTTPS}
+        protocol: tcp
+        mode: host
+    volumes:
+      - type: bind
+        source: /etc/timezone
+        target: /etc/timezone
+        read_only: true
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+      - type: volume
+        source: proxy_data
+        target: /data
+      - type: volume
+        source: proxy_letsencrypt
+        target: /etc/letsencrypt
+    logging:
+      driver: "gelf"
+      options:
+        gelf-address: "udp://masterlogs.networksintelligence.com:12201"
+        tag: "srv-proxy"
+    networks:
+      networksintelligence_com:
+        ipv4_address: 172.23.0.10
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:81"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  networksintelligence_com:
+    external: true
+    name: networksintelligence_com
+    labels:
+      - "com.networksintelligence.app=${APP_ID}"
+      - "com.networksintelligence.type=application"
+
+volumes:
+  proxy_data:
+    name: ${APP_ID}${SERVICE_ID}${MICROSERVICE_ID}${MICROSERVICE_VERSION}_masterproxy_data
+    driver: local
+    labels:
+      - "com.networksintelligence.app=${APP_ID}"
+      - "com.networksintelligence.type=proxy"
+  proxy_letsencrypt:
+    name: ${APP_ID}${SERVICE_ID}${MICROSERVICE_ID}${MICROSERVICE_VERSION}_masterproxy_letsencrypt
+    driver: local
+    labels:
+      - "com.networksintelligence.app=${APP_ID}"
+      - "com.networksintelligence.type=proxy"
+  proxy_files:
+    name: ${APP_ID}${SERVICE_ID}${MICROSERVICE_ID}${MICROSERVICE_VERSION}_masterproxy_files
+    driver: local
+    labels:
+      - "com.networksintelligence.app=${APP_ID}"
+      - "com.networksintelligence.type=files"

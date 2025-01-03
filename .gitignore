@@ -1,0 +1,68 @@
+# === Système d'exploitation ===
+# Fichiers spécifiques à macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Fichiers spécifiques à Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# === Environnements de développement ===
+# Fichiers de logs
+*.log
+
+# Fichiers temporaires ou de cache
+*.tmp
+*.swp
+*.swo
+*.bak
+*.pid
+
+# === Dépendances ===
+# Node.js / JavaScript
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Python
+__pycache__/
+*.py[cod]
+.Python
+
+# Java / Maven / Gradle
+target/
+*.class
+
+# Ruby / Rails
+.bundle/
+log/
+tmp/
+
+# === IDE et éditeurs ===
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# JetBrains (IntelliJ, PyCharm, WebStorm, etc.)
+.idea/
+*.iml
+
+# Eclipse IDE
+.project
+.classpath
+
+# Vim / Neovim
+*.swp
+*.swo
+
+# === Secrets et configurations locales ===
+.env*
+*.env
+*.local
+config.json
+
+# === Autres fichiers inutiles ===
+# Sauvegardes générées par certains éditeurs ou systèmes d'exploitation.
+*~

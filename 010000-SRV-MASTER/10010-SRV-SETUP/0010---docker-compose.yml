@@ -1,0 +1,53 @@
+services:
+  srv-masterproxy:
+    image: 'docker.io/jc21/nginx-proxy-manager:latest'
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - "com.networksintelligence.app=${APP_ID}"
+        - "com.networksintelligence.service=${SERVICE_ID}"
+    ports:
+      - ${PORT_FTD}:81
+      - ${PORT_HTTP}:80
+      - ${PORT_HTTPS}:443
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+      - data:/data
+      - letsencrypt:/etc/letsencrypt
+    logging:
+      driver: "gelf"
+      options:
+        gelf-address: "udp://masterlogs.networksintelligence.com:12201"
+        tag: "srv-proxy"
+    environment:
+      OTLP_HTTP_ENDPOINT: "https://masterlogs.networksintelligence.com/api/default"
+      OTLP_HTTP_AUTHORIZATION: "Basic d2VibWFzdGVyQG5ldHdvcmtzaW50ZWxsaWdlbmNlLmNvbTpjcmdKWmtmWkhMQXZ1RGl6"
+    networks:
+      networksintelligence_com:
+        ipv4_address: 172.23.0.10
+
+networks:
+  networksintelligence_com:
+    external: true
+    labels:
+      - "com.networksintelligence.app=${APP_ID}"
+      - "com.networksintelligence.type=application"
+
+volumes:
+  data:
+    name: ${APP_ID}${SERVICE_ID}${MICROSERVICE_ID}${MICROSERVICE_VERSION}_data
+    driver: local
+    labels:
+      - "com.networksintelligence.app=${APP_ID}"
+      - "com.networksintelligence.type=data"
+  letsencrypt:
+    name: ${APP_ID}${SERVICE_ID}${MICROSERVICE_ID}${MICROSERVICE_VERSION}_letsencrypt
+    driver: local
+    labels:
+      - "com.networksintelligence.app=${APP_ID}"
+      - "com.networksintelligence.type=cert"

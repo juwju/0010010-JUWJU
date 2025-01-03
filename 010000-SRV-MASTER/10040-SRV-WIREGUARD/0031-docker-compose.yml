@@ -1,0 +1,32 @@
+services:
+  srv-wireguard:
+    image: ghcr.io/wg-easy/wg-easy
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - WG_HOST=203.161.46.164
+    volumes:
+      - ./config:/etc/wireguard
+      - /lib/modules:/lib/modules
+    ports:
+      - "51820:51820/udp"
+      - "51821:51821/tcp"
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    networks:
+      networksintelligence_com:
+        ipv4_address: 172.23.0.11
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:81"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  networksintelligence_com:
+    external: true
+    name: networksintelligence_com
+    labels:
+      - "com.networksintelligence.app=${APP_ID}"
+      - "com.networksintelligence.type=application"

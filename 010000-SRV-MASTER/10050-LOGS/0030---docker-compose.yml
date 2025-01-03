@@ -1,0 +1,22 @@
+
+services:
+  srv-logs:
+    image: public.ecr.aws/zinclabs/openobserve:latest
+    container_name: ${APP_ID}${SERVICE_ID}${MICROSERVICE_ID}${MICROSERVICE_VERSION}-${PROJECT_NAME}-${SERVICE_ID}
+    ports:
+      - '${APP_ID}${SERVICE_ID}${MICROSERVICE_ID}${MICROSERVICE_VERSION}:5080' # Expose le port 5080 pour accéder à l'interface web
+    environment:
+      ZO_ROOT_USER_EMAIL: ${WEBMASTER_EMAIL} # Email de l'utilisateur root
+      ZO_ROOT_USER_PASSWORD: ${WEBMASTER_PASSWORD} # Mot de passe de l'utilisateur root
+      ZO_DATA_DIR: "/data" # Répertoire des données
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+      - ./${SERVICE_ID}${MICROSERVICE_ID}${MICROSERVICE_VERSION}---volumes-${PROJECT_NAME}-${SERVICE_ID}/data:/data # Monte un volume local pour persister les données
+    networks:
+      custom_network:
+
+networks:
+  custom_network:
+    name: ${NETWORK_NAME}
+    external: true

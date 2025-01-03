@@ -1,0 +1,48 @@
+{
+  "tasks": {
+    "up": "deno run --allow-run --allow-net --allow-read --allow-env ./000000-SRV-SCRIPT/01010---srv-deno-scripts/013---docker-compose.ts -d up",
+    "uplog": "deno run --allow-run --allow-net --allow-read --allow-env ./000000-SRV-SCRIPT/01010---srv-deno-scripts/013---docker-compose.ts up",
+    "upbuild": "deno run --allow-run --allow-net --allow-read --allow-env ./000000-SRV-SCRIPT/01010---srv-deno-scripts/013---docker-compose.ts up --build",
+    "down": "deno run --allow-run --allow-net --allow-read --allow-env ./000000-SRV-SCRIPT/01010---srv-deno-scripts/013---docker-compose.ts -d down",
+    "downlog": "deno run --allow-run --allow-net --allow-read --allow-env ./000000-SRV-SCRIPT/01010---srv-deno-scripts/013---docker-compose.ts down",
+    "restart": "deno run --allow-run --allow-net --allow-read --allow-env ./000000-SRV-SCRIPT/01010---srv-deno-scripts/013---docker-compose.ts restart",
+    "cloneftd": "deno run --allow-run --allow-net --allow-read --allow-env ./000000-SRV-SCRIPT/01010---srv-deno-scripts/014---clone-ftd.ts",
+    "denoupdt": "sudo deno run --allow-run --allow-read --allow-write --allow-net ./000000-SRV-SCRIPT/01010---srv-deno-scripts/016---Upgrade-Deno.ts",
+    "diagsrv": "sudo deno run --allow-run --allow-read --allow-write --allow-net ./000000-SRV-SCRIPT/01010---srv-deno-scripts/001---srv-server_diagnostic.ts",
+    "cvtvol": "deno run --allow-run --allow-read --allow-write --allow-net ./000000-SRV-SCRIPT/01010---srv-deno-scripts/004---docker-tool.ts",
+    "installapp": "sudo deno run --allow-run --allow-read --allow-write --allow-net ./000000-SRV-SCRIPT/01010---srv-deno-scripts/003---srv-installApp.ts"
+  },
+  "imports": {
+    "std/": "https://deno.land/std@0.208.0/",
+    "dotenv": "https://deno.land/x/dotenv@v3.2.2/mod.ts",
+    "oak": "https://deno.land/x/oak@v12.6.1/mod.ts"
+  },
+  "compilerOptions": {
+    "lib": ["deno.window"],
+    "strict": true
+  },
+  "fmt": {
+    "files": {
+      "include": ["src/"],
+      "exclude": ["src/testdata/"]
+    },
+    "options": {
+      "useTabs": false,
+      "lineWidth": 120,
+      "indentWidth": 2,
+      "singleQuote": true,
+      "proseWrap": "preserve"
+    }
+  },
+  "lint": {
+    "files": {
+      "include": ["src/"],
+      "exclude": ["src/testdata/"]
+    },
+    "rules": {
+      "tags": ["recommended"],
+      "include": ["ban-untagged-todo"],
+      "exclude": ["no-explicit-any"]
+    }
+  }
+}

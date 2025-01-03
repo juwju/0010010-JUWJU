@@ -1,0 +1,12 @@
+version: '3.7'
+services:
+  theia:
+    image: theiaide/theia:next
+    container_name: eclipse-theia
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./workspace:/home/project  # Montez un volume local pour persister les données.
+    environment:
+      - THEIA_DEFAULT_PLUGINS=local-dir:/home/project/plugins  # Optionnel, pour ajouter des plugins.
+    restart: always

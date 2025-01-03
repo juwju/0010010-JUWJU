@@ -1,0 +1,48 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: "0.0.0.0:4317"
+      http:
+        endpoint: "0.0.0.0:4318"
+
+processors:
+  batch: {}
+
+exporters:
+  # Exportateur HTTP vers masterlogs.networksintelligence.com
+  otlphttp/logs:
+    endpoint: "https://masterlogs.networksintelligence.com/api/default"
+    headers:
+      Authorization: "Basic d2VibWFzdGVyQG5ldHdvcmtzaW50ZWxsaWdlbmNlLmNvbTpjcmdKWmtmWkhMQXZ1RGl6"
+      organization: "default"
+      stream-name: "default"
+    tls:
+      insecure: false
+
+  # Exportateur gRPC vers masterlogs.networksintelligence.com
+  otlp/logs:
+    endpoint: "masterlogs.networksintelligence.com:4317"
+    headers:
+      Authorization: "Basic d2VibWFzdGVyQG5ldHdvcmtzaW50ZWxsaWdlbmNlLmNvbTpjcmdKWmtmWkhMQXZ1RGl6"
+      organization: "default"
+      stream-name: "default"
+    tls:
+      insecure: false
+
+service:
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlphttp/logs, otlp/logs]
+
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlphttp/logs, otlp/logs]
+
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlphttp/logs, otlp/logs]
