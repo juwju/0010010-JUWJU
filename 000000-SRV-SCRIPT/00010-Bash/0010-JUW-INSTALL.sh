@@ -194,12 +194,12 @@ UpdateRow() {
 loadBoard() {
     boardTitle["MainInstall"]="JUWJU INSTALL PROCESS"
     boardHeader["MainInstall"]="Target,Step,Description,States"
-    boardRows["MainInstall"]="System|Basic setup|Setup groups/users/directories|0//"
+    boardRows["MainInstall"]="System|Basic_setup|Setup_groups/users/directories|0//"
     boardRows["MainInstall"]+="System|Optimization|Inspect/clean/update/requirements|0//"
     boardRows["MainInstall"]+="Hardware|Optimization|Inspect/update/requirements|0//"
     boardRows["MainInstall"]+="Software|Optimization|Install/configure/start|0//"
     boardRows["MainInstall"]+="Network|Optimization|Setup/secure/connect|0//"
-    boardRows["MainInstall"]+="Juwju|Launch|Access visual next step|0//"
+    boardRows["MainInstall"]+="Juwju|Launch|Access_visual_next_step|0//"
 }
 
 
